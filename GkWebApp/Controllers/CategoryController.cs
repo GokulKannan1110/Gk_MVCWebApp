@@ -1,5 +1,6 @@
 ﻿using GkWebApp.Data;
 using GkWebApp.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GkWebApp.Controllers
@@ -37,12 +38,54 @@ namespace GkWebApp.Controllers
             if (ModelState.IsValid)
             {
                 _context.Categories.Add(category);
+                TempData["Success"] = "Category Created Successfully!";
                 _context.SaveChanges();
                 return RedirectToAction("Index", "Category");
             }
 
             return View();
             
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            if(id == null || id == 0)
+            {
+                return NotFound();
+            }
+            Category? category = _context.Categories.FirstOrDefault(c => c.Id == id);
+            return View(category);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Categories.Update(category);
+                TempData["Success"] = "Category Updated Successfully!";
+                _context.SaveChanges();
+                return RedirectToAction("Index", "Category");
+            }
+
+            return View();
+
+        }
+
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            Category? category = _context.Categories.FirstOrDefault(c => c.Id == id);
+            if (category != null)
+            {
+                _context.Categories.Remove(category);
+                TempData["Success"] = "Category Deleted Successfully!";
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index", "Category");
         }
     }
 }
