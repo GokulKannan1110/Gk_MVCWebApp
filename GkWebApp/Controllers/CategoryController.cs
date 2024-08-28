@@ -1,4 +1,4 @@
-﻿using GkWebApp.Data;
+﻿using GkWebApp.DataAccess.Data;
 using GkWebApp.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +54,10 @@ namespace GkWebApp.Controllers
                 return NotFound();
             }
             Category? category = _context.Categories.FirstOrDefault(c => c.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
             return View(category);
         }
 
@@ -73,6 +77,22 @@ namespace GkWebApp.Controllers
         }
 
         public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            Category? category = _context.Categories.FirstOrDefault(c => c.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            return View(category);
+        }
+
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeletePOST(int? id)
         {
             if (id == null || id == 0)
             {

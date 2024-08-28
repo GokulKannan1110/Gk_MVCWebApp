@@ -1,4 +1,4 @@
-using GkWebApp.Data;
+using GkWebApp.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
