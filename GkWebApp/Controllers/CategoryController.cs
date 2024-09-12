@@ -10,15 +10,18 @@ namespace GkWebApp.Controllers
     {
         //private readonly ApplicationDbContext _context;
         //Now we have repository pattern in place, so we can replace the ApplicationDbContext with Category Repository.
-        private readonly ICategoryRepository _categoryRepo;
-        public CategoryController(ICategoryRepository Context)
+        //private readonly ICategoryRepository _categoryRepo;
+
+        private readonly IUnitOfWork _unitOfWork;
+
+        public CategoryController(IUnitOfWork UnitOfWork)
         {
-            _categoryRepo = Context;
+            _unitOfWork = UnitOfWork;
         }
 
         public IActionResult Index()
         {
-            List<Category> categoriesList = _categoryRepo.GetAll().ToList();
+            List<Category> categoriesList = _unitOfWork.Category.GetAll().ToList();
             return View(categoriesList);
         }
 
@@ -40,9 +43,9 @@ namespace GkWebApp.Controllers
             }
             if (ModelState.IsValid)
             {
-                
-                _categoryRepo.Add(category);
-                _categoryRepo.Save();
+
+                _unitOfWork.Category.Add(category);
+                _unitOfWork.Save();
                 TempData["Success"] = "Category Created Successfully!";
 
                 return RedirectToAction("Index", "Category");
@@ -58,7 +61,7 @@ namespace GkWebApp.Controllers
             {
                 return NotFound();
             }
-            Category? category = _categoryRepo.Get(c => c.Id == id);
+            Category? category = _unitOfWork.Category.Get(c => c.Id == id);
             if (category == null)
             {
                 return NotFound();
@@ -71,9 +74,9 @@ namespace GkWebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _categoryRepo.Update(category);
+                _unitOfWork.Category.Update(category);
                 TempData["Success"] = "Category Updated Successfully!";
-                _categoryRepo.Save();
+                _unitOfWork.Save();
                 return RedirectToAction("Index", "Category");
             }
 
@@ -87,7 +90,7 @@ namespace GkWebApp.Controllers
             {
                 return NotFound();
             }
-            Category? category = _categoryRepo.Get(c => c.Id == id);
+            Category? category = _unitOfWork.Category.Get(c => c.Id == id);
             if (category == null)
             {
                 return NotFound();
@@ -103,12 +106,12 @@ namespace GkWebApp.Controllers
             {
                 return NotFound();
             }
-            Category? category = _categoryRepo.Get(c => c.Id == id);
+            Category? category = _unitOfWork.Category.Get(c => c.Id == id);
             if (category != null)
             {
-                _categoryRepo.Remove(category);
+                _unitOfWork.Category.Remove(category);
                 TempData["Success"] = "Category Deleted Successfully!";
-                _categoryRepo.Save();
+                _unitOfWork.Save();
             }
             return RedirectToAction("Index", "Category");
         }
