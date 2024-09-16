@@ -4,8 +4,9 @@ using GkWebApp.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GkWebApp.Controllers
+namespace GkWebApp.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         //private readonly ApplicationDbContext _context;
@@ -33,7 +34,7 @@ namespace GkWebApp.Controllers
         [HttpPost]
         public IActionResult Create(Category category)
         {
-            if(category.Name == category.DisplayOrder.ToString())
+            if (category.Name == category.DisplayOrder.ToString())
             {
                 ModelState.AddModelError("name", "Name and Display Order Cannot be the same.");
             }
@@ -52,12 +53,12 @@ namespace GkWebApp.Controllers
             }
 
             return View();
-            
+
         }
 
         public IActionResult Edit(int? id)
         {
-            if(id == null || id == 0)
+            if (id == null || id == 0)
             {
                 return NotFound();
             }
