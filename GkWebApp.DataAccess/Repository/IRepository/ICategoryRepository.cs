@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GkWebApp.DataAccess.Repository.IRepository
 {
-    public interface ICategoryRepository : IRespository<Category>
+    public interface ICategoryRepository : IRepository<Category>
     {
         void Update(Category category);        
     }

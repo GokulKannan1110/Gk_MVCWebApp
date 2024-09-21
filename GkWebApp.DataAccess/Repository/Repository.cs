@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GkWebApp.DataAccess.Repository
 {
-    public class Repository<T> : IRespository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
     {
         private readonly ApplicationDbContext _db;
         internal DbSet<T> dbSet;
