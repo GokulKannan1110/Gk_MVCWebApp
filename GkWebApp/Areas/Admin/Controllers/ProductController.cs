@@ -4,6 +4,8 @@ using GkWebApp.Models;
 using GkWebApp.Models.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Generic;
 
 namespace GkWebApp.Areas.Admin.Controllers
 {
@@ -24,11 +26,23 @@ namespace GkWebApp.Areas.Admin.Controllers
         public IActionResult Index()
         {
             List<Product> productsList = _unitOfWork.Product.GetAll().ToList();
+            
             return View(productsList);
         }
 
         public IActionResult Create()
         {
+            //Here I need the list of Categories to be passed to this page, to display it in a dropdown.
+
+            //First we can retrieve the Categories and using the EF Core feature -Projections, we can convert the object of Category to an object of SelectListItem
+            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category
+                .GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                });
+            //ViewBag.CategoryList = CategoryList;
+            ViewData["CategoryList"] = CategoryList;
             return View();
         }
 
