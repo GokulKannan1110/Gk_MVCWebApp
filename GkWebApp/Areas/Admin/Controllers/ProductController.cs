@@ -136,37 +136,37 @@ namespace GkWebApp.Areas.Admin.Controllers
         }
 
        
-        public IActionResult Delete(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            Product? Product = _unitOfWork.Product.Get(c => c.Id == id);
-            if (Product == null)
-            {
-                return NotFound();
-            }
-            return View(Product);
-        }
+        //public IActionResult Delete(int? id)
+        //{
+        //    if (id == null || id == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    Product? Product = _unitOfWork.Product.Get(c => c.Id == id);
+        //    if (Product == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(Product);
+        //}
 
 
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePOST(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            Product? Product = _unitOfWork.Product.Get(c => c.Id == id);
-            if (Product != null)
-            {
-                _unitOfWork.Product.Remove(Product);
-                TempData["Success"] = "Product Deleted Successfully!";
-                _unitOfWork.Save();
-            }
-            return RedirectToAction("Index", "Product");
-        }
+        //[HttpPost, ActionName("Delete")]
+        //public IActionResult DeletePOST(int? id)
+        //{
+        //    if (id == null || id == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    Product? Product = _unitOfWork.Product.Get(c => c.Id == id);
+        //    if (Product != null)
+        //    {
+        //        _unitOfWork.Product.Remove(Product);
+        //        TempData["Success"] = "Product Deleted Successfully!";
+        //        _unitOfWork.Save();
+        //    }
+        //    return RedirectToAction("Index", "Product");
+        //}
 
         #region APICALLS
 
@@ -176,6 +176,28 @@ namespace GkWebApp.Areas.Admin.Controllers
             List<Product> productsList = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
 
             return Json(new { data = productsList });
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int? id)
+        {
+            var productToDelete = _unitOfWork.Product.Get(p => p.Id == id);
+            if (productToDelete == null)
+            {
+                return Json(new { success = false, message = "Error Occured"});
+            }
+
+            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToDelete.ImageUrl.TrimStart('\\'));
+
+            if(System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+
+            _unitOfWork.Product.Remove(productToDelete);
+            _unitOfWork.Save();
+
+            return Json(new { success = true, message = "Delete Successful" });
         }
         #endregion
     }
