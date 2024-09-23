@@ -19,7 +19,25 @@ namespace GkWebApp.DataAccess.Repository
         }
         public void Update(Product product)
         {
-            _db.Products.Update(product);
+            //This is the reason to not have the Update funcion in generic repository.
+            //We may need to have some custom logics, so its better to have it under indivdual repository
+           var productDBData = _db.Products.FirstOrDefault(u => u.Id == product.Id);
+           if(productDBData != null)
+            {
+                productDBData.Title = product.Title;
+                productDBData.Description = product.Description;
+                productDBData.CategoryId = product.CategoryId;
+                productDBData.ISBN = product.ISBN;
+                productDBData.Author = product.Author;
+                productDBData.ListPrice = product.ListPrice;
+                productDBData.Price = product.Price;
+                productDBData.Price50 = product.Price50;
+                productDBData.Price100 = product.Price100;
+                if (product.ImageUrl != null)
+                {
+                    productDBData.ImageUrl = product.ImageUrl;
+                }
+            }
         }
     }
 }
