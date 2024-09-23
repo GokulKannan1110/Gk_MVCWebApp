@@ -1,10 +1,13 @@
 ﻿using GkWebApp.DataAccess.Data;
+using GkWebApp.DataAccess.Repository;
 using GkWebApp.DataAccess.Repository.IRepository;
 using GkWebApp.Models;
 using GkWebApp.Models.Models;
+using GkWebApp.Models.ViewModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
 
 namespace GkWebApp.Areas.Admin.Controllers
@@ -17,10 +20,12 @@ namespace GkWebApp.Areas.Admin.Controllers
         //private readonly IProductRepository _ProductRepo;
 
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductController(IUnitOfWork UnitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ProductController(IUnitOfWork UnitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = UnitOfWork;
+            _webHostEnvironment = webHostEnvironment;
+
         }
 
         public IActionResult Index()
@@ -30,76 +35,107 @@ namespace GkWebApp.Areas.Admin.Controllers
             return View(productsList);
         }
 
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
             //Here I need the list of Categories to be passed to this page, to display it in a dropdown.
 
             //First we can retrieve the Categories and using the EF Core feature -Projections, we can convert the object of Category to an object of SelectListItem
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category
+            //IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category
+            //    .GetAll().Select(u => new SelectListItem
+            //    {
+            //        Text = u.Name,
+            //        Value = u.Id.ToString()
+            //    });
+
+            //ViewBag.CategoryList = CategoryList;
+            //ViewData["CategoryList"] = CategoryList;
+            ProductVM productVM = new()
+            {
+                CategoryList = _unitOfWork.Category
                 .GetAll().Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
-                });
-            //ViewBag.CategoryList = CategoryList;
-            ViewData["CategoryList"] = CategoryList;
-            return View();
+                }),
+                Product = new Product()
+            };
+            if(id ==0 || id == null)
+            {
+                //Create
+                return View(productVM);
+            }
+            else
+            {
+                //update
+                productVM.Product = _unitOfWork.Product.Get(p => p.Id == id);
+                return View(productVM);
+            }
+            
         }
 
         [HttpPost]
-        public IActionResult Create(Product Product)
+        public IActionResult Upsert(ProductVM productVM, IFormFile file)
         {
-            if (Product.Title == Product.Description.ToString())
+            if (productVM.Product.Title == productVM.Product.Description.ToString())
             {
                 ModelState.AddModelError("name", "Title and Description Cannot be the same.");
             }
-            if (Product.Title != null && Product.Title.ToLower() == "test")
+            if (productVM.Product.Title != null && productVM.Product.Title.ToLower() == "test")
             {
                 ModelState.AddModelError("", "Test is a invalid title.");
             }
             if (ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if(file != null)
+                {
+                    string filename = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string productPath = Path.Combine(wwwRootPath, @"images\product");
 
-                _unitOfWork.Product.Add(Product);
+                    if( !string.IsNullOrEmpty(productVM.Product.ImageUrl))
+                    {
+                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                        if(System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
+                        productVM.Product.ImageUrl = @"\images\product\" + filename;
+                    }                    
+                    using (var fileStream = new FileStream(Path.Combine(productPath, filename), FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+                    productVM.Product.ImageUrl = @"\images\product\" + filename;
+                    
+                }
+
+                if(productVM.Product.Id == 0)
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                }
+                else
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                }
                 _unitOfWork.Save();
                 TempData["Success"] = "Product Created Successfully!";
 
                 return RedirectToAction("Index", "Product");
             }
-
-            return View();
-
+            else
+            {
+                productVM.CategoryList = _unitOfWork.Category
+                .GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                });
+                return View(productVM);
+            }
+            
         }
 
-        public IActionResult Edit(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            Product? Product = _unitOfWork.Product.Get(c => c.Id == id);
-            if (Product == null)
-            {
-                return NotFound();
-            }
-            return View(Product);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(Product Product)
-        {
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Product.Update(Product);
-                TempData["Success"] = "Product Updated Successfully!";
-                _unitOfWork.Save();
-                return RedirectToAction("Index", "Product");
-            }
-
-            return View();
-
-        }
-
+       
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
