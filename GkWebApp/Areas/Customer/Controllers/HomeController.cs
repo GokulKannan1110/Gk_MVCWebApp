@@ -1,4 +1,6 @@
+using GkWebApp.DataAccess.Repository.IRepository;
 using GkWebApp.Models;
+using GkWebApp.Models.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -8,15 +10,24 @@ namespace GkWebApp.Areas.Customer.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IUnitOfWork _unitofWork;
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
+            _unitofWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
-            return View();
+            IEnumerable<Product> productList = _unitofWork.Product.GetAll(includeProperties: "Category");
+            return View(productList);
+        }
+
+        public IActionResult Details(int productId)
+        {
+            Product product = _unitofWork.Product.Get(p => p.Id == productId, includeProperties: "Category");
+
+            return View(product);
         }
 
         public IActionResult Privacy()

@@ -84,6 +84,7 @@ namespace GkWebApp.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("", "Test is a invalid title.");
             }
+            ModelState.Remove("file");
             if (ModelState.IsValid)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
@@ -112,14 +113,16 @@ namespace GkWebApp.Areas.Admin.Controllers
                 if(productVM.Product.Id == 0)
                 {
                     _unitOfWork.Product.Add(productVM.Product);
+                    TempData["Success"] = "Product Created Successfully!";
                 }
                 else
                 {
                     _unitOfWork.Product.Update(productVM.Product);
+                    TempData["Success"] = "Product Updated Successfully!";
+
                 }
                 _unitOfWork.Save();
-                TempData["Success"] = "Product Created Successfully!";
-
+                
                 return RedirectToAction("Index", "Product");
             }
             else
