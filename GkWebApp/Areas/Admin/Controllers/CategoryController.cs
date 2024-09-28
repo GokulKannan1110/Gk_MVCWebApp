@@ -1,12 +1,15 @@
 ﻿using GkWebApp.DataAccess.Data;
 using GkWebApp.DataAccess.Repository.IRepository;
 using GkWebApp.Models;
+using GkWebApp.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GkWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = UtilityHelper.Role_Admin)]
     public class CategoryController : Controller
     {
         //private readonly ApplicationDbContext _context;

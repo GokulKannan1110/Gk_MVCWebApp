@@ -4,6 +4,8 @@ using GkWebApp.DataAccess.Repository.IRepository;
 using GkWebApp.Models;
 using GkWebApp.Models.Models;
 using GkWebApp.Models.ViewModels;
+using GkWebApp.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -13,6 +15,7 @@ using System.Collections.Generic;
 namespace GkWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = UtilityHelper.Role_Admin)]
     public class ProductController : Controller
     {
         //private readonly ApplicationDbContext _context;
