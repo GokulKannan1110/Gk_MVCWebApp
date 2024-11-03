@@ -1,0 +1,1 @@
+This is a .Net 8 - ASP.Net Core MVC based Application with Razor pages as well. Here, I have used the EntityFrameworkCore - ORM for the Database Interactions with Code First approach. And I have used Microsoft- Identity package for the User and Authentication management. Also, I have used the bootstrap, toastr and bootstrap icons for UI. 
